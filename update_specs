@@ -1,0 +1,17 @@
+#!/bin/bash
+set -euo pipefail
+
+# Proto → protobuf messages (data plane)
+cd src/s2_sdk/_generated
+uv run python -m grpc_tools.protoc \
+  -I../../../s2-specs \
+  --python_out=. \
+  --pyi_out=. \
+  ../../../s2-specs/s2/v1/s2.proto
+
+# Fix import paths
+find . -name '*.py' | xargs -I{} sed -i '' 's/from s2\.\(v[0-9][a-z0-9]*\) import s2_pb2/from s2_sdk._generated.s2.\1 import s2_pb2/' {}
+cd ../../..
+
+# Run checks
+uv run poe checker

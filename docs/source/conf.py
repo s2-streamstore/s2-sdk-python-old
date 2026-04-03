@@ -8,9 +8,9 @@
 
 from datetime import date
 
-project = "streamstore"
+project = "s2-sdk"
 copyright = f"{date.today().year}, Bandar Systems Inc"
-release = "5.0.0"
+release = "0.1.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -27,6 +27,11 @@ extensions = [
 
 templates_path = ["_templates"]
 exclude_patterns = []
+
+
+autodoc_member_order = "bysource"
+autodoc_typehints_format = "short"
+python_use_unqualified_type_names = True
 
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 

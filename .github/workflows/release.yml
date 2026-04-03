@@ -1,4 +1,4 @@
-name: Release streamstore package
+name: Release s2-sdk package
 on:
   push:
     tags: ["[0-9]+.[0-9]+.[0-9]+*"]

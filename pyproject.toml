@@ -1,26 +1,29 @@
 [project]
-name = "streamstore"
-version = "5.0.0"
+name = "s2-sdk"
+version = "0.1.0"
 description = "Python SDK for s2.dev"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = [
-    "grpcio-tools>=1.69.0",
-    "grpcio>=1.69.0",
-    "types-protobuf>=5.29.1.20241207",
-    "grpc-stubs>=1.53.0.5",
-    "anyio>=4.8.0",
+    "h2>=4.1.0",
+    "protobuf>=5.29.0",
+    "zstandard>=0.23.0",
 ]
 
 [dependency-groups]
-dev = ["mypy>=1.14.1", "poethepoet>=0.36.0", "ruff>=0.9.1"]
+dev = [
+    "grpcio-tools>=1.69.0",
+    "mypy>=1.14.1",
+    "poethepoet>=0.36.0",
+    "ruff>=0.9.1",
+    "types-protobuf>=5.29.1.20241207",
+]
 test = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
     "pytest-timeout>=2.3.0",
-    "pytest-xdist>=3.5.0",
 ]
 docs = [
     "enum-tools[sphinx]>=0.12.0",
@@ -28,14 +31,20 @@ docs = [
     "myst-parser>=4.0.0",
     "sphinx==8.1.3",
     "sphinx-autodoc-typehints>=3.0.0",
+    "sphinx-autobuild>=2024.10.3",
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/s2_sdk"]
+
 [tool.mypy]
-files = ["src/", "tests/", "examples/"]
+files = ["src/s2_sdk/", "tests/"]
+exclude = ["src/s2_sdk/_generated/"]
+check_untyped_defs = true
 
 [tool.ruff]
 exclude = [
@@ -59,7 +68,10 @@ ci_linter = "uv run ruff check"
 ci_formatter = "uv run ruff format --check"
 checker = ["linter", "formatter", "type_checker"]
 ci_checker = ["ci_linter", "ci_formatter", "type_checker"]
-e2e_tests = "uv run pytest tests/ -v -s"
+docs_check = "uv run --group docs sphinx-build -W -b html docs/source docs/build/html"
+docs_clean = "rm -rf docs/build"
+docs_live.sequence = ["docs_clean", "docs_check", {cmd = "uv run --group docs sphinx-autobuild docs/source docs/build/html --watch src/s2_sdk"}]
+e2e_tests = "uv run pytest tests/ -v -s -m 'account or basin or stream'"
 e2e_account_tests = "uv run pytest tests/ -v -s -m account"
 e2e_basin_tests = "uv run pytest tests/ -v -s -m basin"
 e2e_stream_tests = "uv run pytest tests/ -v -s -m stream"

@@ -1,10 +1,10 @@
-# streamstore
+# s2-sdk
 <div>
   <p>
     <!-- PyPI -->
-    <a href="https://pypi.org/project/streamstore/"><img src="https://img.shields.io/pypi/v/streamstore" /></a>
+    <a href="https://pypi.org/project/s2-sdk/"><img src="https://img.shields.io/pypi/v/s2-sdk" /></a>
     <!-- Read the docs -->
-    <a href="https://streamstore.readthedocs.io/"><img src="https://img.shields.io/readthedocs/streamstore/latest" /></a>
+    <a href="https://s2-sdk.readthedocs.io/"><img src="https://img.shields.io/readthedocs/s2-sdk/latest" /></a>
     <!-- Discord -->
     <a href="https://discord.gg/vTCs7kMkAf"><img src="https://img.shields.io/discord/1209937852528599092?logo=discord" /></a>
     <!-- LICENSE -->
@@ -12,12 +12,12 @@
   </p>
 </div>
 
-`streamstore` is the Python package that provides an async client for interacting with [s2.dev](https://s2.dev/).
+`s2_sdk` is the Python package that provides an async client for interacting with [s2.dev](https://s2.dev/).
 
 ## Project links
 
-- [PyPI](https://pypi.org/project/streamstore/)
-- [Documentation](https://streamstore.readthedocs.io/)
+- [PyPI](https://pypi.org/project/s2-sdk/)
+- [Documentation](https://s2-sdk.readthedocs.io/)
 - [GitHub](https://github.com/s2-streamstore/s2-sdk-python)
 
 ## Requirements
@@ -26,10 +26,10 @@ Python >= 3.11
 
 ## Installation
 
-You can install the package from the [Python Package Index](https://pypi.org/project/streamstore) using the package manager of your choice. E.g., with `pip`:
+You can install the package from the [Python Package Index](https://pypi.org/project/s2-sdk) using the package manager of your choice. E.g., with `pip`:
 
 ```bash
-pip install streamstore
+pip install s2-sdk
 ```
 
 ## Examples

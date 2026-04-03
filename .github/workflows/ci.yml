@@ -1,23 +1,39 @@
 name: CI
-on: 
+
+# NOTE: keep UV_VERSION in sync with uv-version in s2-lite-integration-tests sdks JSON below.
+env:
+  UV_VERSION: "0.11.3"
+
+on:
   pull_request:
-    types: [opened, edited, synchronize, labeled, unlabeled, ready_for_review, reopened]
+    types:
+      [
+        opened,
+        edited,
+        synchronize,
+        labeled,
+        unlabeled,
+        ready_for_review,
+        reopened,
+      ]
 jobs:
-  ci:
-    name: CI
+  local-checks:
+    name: Local Checks (code quality, unit tests, docs build, PR title)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
-          version: "0.8.2"
+          version: ${{ env.UV_VERSION }}
       - name: Sync dependencies
         run: |
           uv sync --all-groups
       - name: Static code check
         run: uv run poe ci_checker
+      - name: Unit tests
+        run: uv run pytest tests/ -v -m 'not (account or basin or stream or metrics)'
       - name: Check docs build
         working-directory: ./docs
         run: |
@@ -26,20 +42,61 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-              const title = context.payload.pull_request.title;
-              const labels = context.payload.pull_request.labels.map(l => l.name);
-              if (labels.includes('dev')) {
-                const regex = /^(?!feat|fix|refactor|docs|perf|style|test|chore|revert)[a-z].*$/;
-                if (!regex.test(title)) {
-                  core.setFailed(
-                    `PR title "${title}" does not match the commit format for non-user-facing changes`
-                  );
-                }
-              } else {
-                const regex = /^(feat|fix|refactor|docs|perf|style|test|chore|revert)!?:[ ][a-z].*$/;
-                if (!regex.test(title)) {
-                  core.setFailed(
-                    `PR title "${title}" does not match the expected conventional commit format for user-facing changes`
-                  );
-                }
+            const title = context.payload.pull_request.title;
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            if (labels.includes('dev')) {
+              const regex = /^(?!feat|fix|refactor|docs|perf|style|test|chore|revert)[a-z].*$/;
+              if (!regex.test(title)) {
+                core.setFailed(
+                  `PR title "${title}" does not match the commit format for non-user-facing changes`
+                );
               }
+            } else {
+              const regex = /^(feat|fix|refactor|docs|perf|style|test|chore|revert)!?:[ ][a-z].*$/;
+              if (!regex.test(title)) {
+                core.setFailed(
+                  `PR title "${title}" does not match the expected conventional commit format for user-facing changes`
+                );
+              }
+            }
+
+  s2-cloud-integration-tests:
+    name: s2-cloud integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: ${{ env.UV_VERSION }}
+      - name: Sync dependencies
+        run: uv sync --group test
+      - name: Run integration tests
+        env:
+          S2_ACCESS_TOKEN: ${{ secrets.S2_ACCESS_TOKEN }}
+        run: uv run pytest tests/ -v -s -m 'account or basin or stream or metrics'
+
+  build-s2-lite:
+    name: Build s2-lite
+    uses: s2-streamstore/s2/.github/workflows/build-s2-lite.yml@main
+
+  s2-lite-integration-tests:
+    name: s2-lite integration tests
+    needs: build-s2-lite
+    uses: s2-streamstore/s2/.github/workflows/sdk-tests.yml@main
+    with:
+      server-binary: server
+      server-args: "--port 8080"
+      server-port: 8080
+      sdks: |
+        [
+          {
+            "name": "python",
+            "repo": "${{ github.repository }}",
+            "ref": "${{ github.ref }}",
+            "lang": "python",
+            "uv-version": "0.11.3",
+            "test_cmd": "uv run pytest tests/ -v -s -m '(account or basin or stream) and not cloud_only'"
+          }
+        ]

@@ -4,9 +4,7 @@ import random
 from datetime import timedelta
 from typing import AsyncIterable
 
-from streamstore import S2
-from streamstore.schemas import Record
-from streamstore.utils import append_inputs_gen
+from s2_sdk import S2, Batching, Record, append_inputs
 
 ACCESS_TOKEN = os.getenv("S2_ACCESS_TOKEN")
 MY_BASIN = os.getenv("MY_BASIN")
@@ -23,17 +21,20 @@ async def records_gen() -> AsyncIterable[Record]:
 
 
 async def producer():
-    async with S2(access_token=ACCESS_TOKEN) as s2:
+    async with S2(ACCESS_TOKEN) as s2:
         stream = s2[MY_BASIN][MY_STREAM]
-        async for output in stream.append_session(
-            append_inputs_gen(
+        async with stream.append_session() as session:
+            async for batch in append_inputs(
                 records=records_gen(),
-                max_records_per_batch=10,
-                max_linger_per_batch=timedelta(milliseconds=5),
-            )
-        ):
-            num_appended_records = output.end_seq_num - output.start_seq_num
-            print(f"appended {num_appended_records} records")
+                batching=Batching(
+                    max_records=10,
+                    linger=timedelta(milliseconds=5),
+                ),
+            ):
+                ticket = await session.submit(batch)
+                ack = await ticket
+                num_appended_records = ack.end.seq_num - ack.start.seq_num
+                print(f"appended {num_appended_records} records")
 
 
 if __name__ == "__main__":
