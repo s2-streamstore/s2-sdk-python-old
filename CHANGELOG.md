@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.0.1] - 2026-04-07
+
+### Miscellaneous Tasks
+
+- Migrate submodule from protos to s2-specs ([#106](https://github.com/s2-streamstore/s2-sdk-python/issues/106))
+- Update `.gitignore` ([#107](https://github.com/s2-streamstore/s2-sdk-python/issues/107))
+- Update `LICENSE` ([#108](https://github.com/s2-streamstore/s2-sdk-python/issues/108))
+- Prep for deprecation and archiving ([#110](https://github.com/s2-streamstore/s2-sdk-python/issues/110))
+
 ## [5.0.0] - 2025-09-03
 
 ### Refactor
