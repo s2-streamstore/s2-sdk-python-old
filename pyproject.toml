@@ -1,11 +1,14 @@
 [project]
 name = "streamstore"
-version = "5.0.0"
-description = "Python SDK for s2.dev"
+version = "5.0.1"
+description = "[DEPRECATED] migrate to s2-sdk"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
+classifiers = [
+    "Development Status :: 7 - Inactive",
+]
 dependencies = [
     "grpcio-tools>=1.69.0",
     "grpcio>=1.69.0",
